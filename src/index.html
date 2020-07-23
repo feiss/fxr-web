@@ -1,0 +1,75 @@
+<html>
+  <head>
+    <script type="text/javascript">
+      // Monkey-patching XRWebGLLayer to increase framebufferScaleFactor
+      var realConstructor = XRWebGLLayer;
+      window.XRWebGLLayer = function(session, context, options) {
+        options = options || {};
+        options.framebufferScaleFactor = 2.0;
+        console.log('XRWebGLLayer!! options: ', options);
+        return new realConstructor(session, context, options);
+      }
+      window.XRWebGLLayer.prototype = realConstructor.prototype;
+    </script>
+    <script src="https://aframe.io/releases/1.0.4/aframe.js"></script>
+    <script src="https://unpkg.com/aframe-cubemap-component@2.1.1/dist/aframe-cubemap-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-event-set-component@^4.0.0/dist/aframe-event-set-component.min.js"></script>
+
+    <script src="components/icon.js"></script>
+    <script src="components/image.js"></script>
+    <script src="components/scene-setup.js"></script>
+  </head>
+  <body>
+    <a-scene background="color: #000000" scene-setup>
+      <a-assets>
+        <img id="screen-home" src="../assets/screen-home.png">
+        <img id="screen-downloads" src="../assets/screen-downloads.png">
+        <img id="screen-history" src="../assets/screen-history.png">
+        <img id="screen-bookmarks" src="../assets/screen-bookmarks.png">
+        <img id="screen-cave" src="../assets/screen-cave.png">
+
+        <a-asset-item id="icon-bookmarks" src="../assets/icons/icon-tray-bookmarks.svg"></a-asset-item>
+
+        <a-asset-item id="icon-tray" src="../assets/icons/tray.svg"></a-asset-item>
+        <a-asset-item id="icon-urlbar" src="../assets/icons/urlbar.svg"></a-asset-item>
+
+      </a-assets>
+
+      <a-entity
+        id="camera"
+        camera
+        look-controls
+        wasd-controls
+        cursor="rayOrigin: mouse"></a-entity>
+
+      <a-entity oculus-touch-controls="hand: left"></a-entity>
+      <a-entity oculus-touch-controls="hand: right"></a-entity>
+      <a-light type="directional" position="1 3 -1" intensity="2"></a-light>
+      <a-entity cubemap="folder: ../assets/cubemap/cave/"></a-entity>
+
+      <a-entity
+        id="screen"
+        position="0 0.35 -4.2"
+        image="src: #screen-home; size: 800 480"
+      ></a-entity>
+
+      <a-entity position="0 -0.45 -4.2"
+        icon="normal:#icon-urlbar; size: 720 44"
+      ></a-entity>
+
+      <a-entity position="0 1.25 -0.5" id="tray"
+        icon="normal:#icon-tray; size: 300 44"
+        ></a-entity>
+
+
+
+      <a-entity position="0 1 -2"
+        icon="normal:#icon-bookmarks; shape: box"
+        event-set__enter="_event: mouseenter; icon.state: hover"
+        event-set__leave="_event: mouseleave; icon.state: normal"
+        ></a-entity>
+
+
+    </a-scene>
+  </body>
+</html>
