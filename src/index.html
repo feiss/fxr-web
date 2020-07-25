@@ -2,14 +2,16 @@
   <head>
     <script type="text/javascript">
       // Monkey-patching XRWebGLLayer to increase framebufferScaleFactor
+
       var realConstructor = XRWebGLLayer;
       window.XRWebGLLayer = function(session, context, options) {
         options = options || {};
-        options.framebufferScaleFactor = 2.0;
+        options.framebufferScaleFactor = 1.68;
         console.log('XRWebGLLayer!! options: ', options);
         return new realConstructor(session, context, options);
       }
       window.XRWebGLLayer.prototype = realConstructor.prototype;
+
     </script>
     <script src="https://aframe.io/releases/1.0.4/aframe.js"></script>
     <script src="https://unpkg.com/aframe-cubemap-component@2.1.1/dist/aframe-cubemap-component.min.js"></script>
@@ -18,9 +20,10 @@
     <script src="components/icon.js"></script>
     <script src="components/image.js"></script>
     <script src="components/scene-setup.js"></script>
+    <script src="components/tweaker.js"></script>
   </head>
   <body>
-    <a-scene background="color: #000000" scene-setup>
+    <a-scene background="color: #000000" scene-setup tweaker>
       <a-assets>
         <img id="screen-home" src="../assets/screen-home.png">
         <img id="screen-downloads" src="../assets/screen-downloads.png">
@@ -28,11 +31,27 @@
         <img id="screen-bookmarks" src="../assets/screen-bookmarks.png">
         <img id="screen-cave" src="../assets/screen-cave.png">
 
-        <a-asset-item id="icon-bookmarks" src="../assets/icons/icon-tray-bookmarks.svg"></a-asset-item>
+        <a-asset-item id="icon-backward" src="../assets/icons/icon-backward.svg"></a-asset-item>
+        <a-asset-item id="icon-forward" src="../assets/icons/icon-forward.svg"></a-asset-item>
+        <a-asset-item id="icon-refresh" src="../assets/icons/icon-refresh.svg"></a-asset-item>
+        <a-asset-item id="icon-home" src="../assets/icons/icon-home.svg"></a-asset-item>
+        <a-asset-item id="icon-hamburger" src="../assets/icons/icon-window-resize.svg"></a-asset-item>
+        <a-asset-item id="icon-microphone" src="../assets/icons/icon-microphone.svg"></a-asset-item>
+        <a-asset-item id="icon-secure" src="../assets/icons/icon-settings-display.svg"></a-asset-item>
+
+        <a-asset-item id="icon-tray-newwindow" src="../assets/icons/icon-tray-newwindow.svg"></a-asset-item>
+        <a-asset-item id="icon-tray-newtab" src="../assets/icons/icon-tray-newtab-v3@1x.svg"></a-asset-item>
+        <a-asset-item id="icon-tray-private-browsing" src="../assets/icons/icon-tray-private-browsing-v2.svg"></a-asset-item>
+        <a-asset-item id="icon-tray-library" src="../assets/icons/valve-icon-globe.svg"></a-asset-item>
+        <a-asset-item id="icon-tray-settings" src="../assets/icons/icon-tray-settings.svg"></a-asset-item>
 
         <a-asset-item id="icon-tray" src="../assets/icons/tray.svg"></a-asset-item>
         <a-asset-item id="icon-urlbar" src="../assets/icons/urlbar.svg"></a-asset-item>
 
+        <a-mixin id="button"
+          class="raycastable"
+          event-set__enter="_event: mouseenter; icon.state: hover"
+          event-set__leave="_event: mouseleave; icon.state: normal"></a-mixin>
       </a-assets>
 
       <a-entity
@@ -40,6 +59,7 @@
         camera
         look-controls
         wasd-controls
+        position="0 1.7 0"
         cursor="rayOrigin: mouse"></a-entity>
 
       <a-entity oculus-touch-controls="hand: left"></a-entity>
@@ -47,27 +67,54 @@
       <a-light type="directional" position="1 3 -1" intensity="2"></a-light>
       <a-entity cubemap="folder: ../assets/cubemap/cave/"></a-entity>
 
+      <a-plane rotation="-90 0 0" position="0 0 0"></a-plane>
+
       <a-entity
         id="screen"
-        position="0 0.35 -4.2"
-        image="src: #screen-home; size: 800 480"
+        position="0 1.55 -4.2"
+        image="src: #screen-home; size: 4 2.4; sizeInMeters: true"
       ></a-entity>
 
-      <a-entity position="0 -0.45 -4.2"
-        icon="normal:#icon-urlbar; size: 720 44"
+      <!--
+      <a-entity position="0 0.15 -4.2"
+        icon="src: #icon-urlbar; size: 1450 88"
       ></a-entity>
-
-      <a-entity position="0 1.25 -0.5" id="tray"
-        icon="normal:#icon-tray; size: 300 44"
-        ></a-entity>
+      -->
 
 
+      <a-entity position="0 0 -2.6" id="tray" rotation="-45 0 0">
+        <a-entity position="-0.57 0 0" mixin="button"
+          icon="src: #icon-tray-newwindow; shape: rounded; radius: 50, 0, 0, 50"></a-entity>
+        <a-entity position="-0.32 0 0" mixin="button"
+          icon="shape: box; src: #icon-tray-newtab"></a-entity>
+        <a-entity position="-0.05 0 0" mixin="button"
+          icon="shape: box; src: #icon-tray-private-browsing"></a-entity>
+        <a-entity position="0.22 0 0" mixin="button"
+          icon="shape: box; src: #icon-tray-library"></a-entity>
+        <a-entity position="0.49 0 0" mixin="button"
+        icon="src: #icon-tray-settings; shape: rounded; radius: 0, 50, 50, 0"></a-entity>
+      </a-entity>
 
-      <a-entity position="0 1 -2"
-        icon="normal:#icon-bookmarks; shape: box"
-        event-set__enter="_event: mouseenter; icon.state: hover"
-        event-set__leave="_event: mouseleave; icon.state: normal"
-        ></a-entity>
+
+      <a-entity position="-0.57 0.15 -4.2" mixin="button"
+       icon="src: #icon-secure; shape: rounded; radius: 50, 0, 0, 50"></a-entity>
+
+
+      <a-entity position="-1.85 0.15 -4.2" mixin="button" icon="src: #icon-backward"></a-entity>
+      <a-entity position="-1.54 0.15 -4.2" mixin="button" icon="src: #icon-forward"></a-entity>
+      <a-entity position="-1.23 0.15 -4.2" mixin="button" icon="src: #icon-refresh"></a-entity>
+      <a-entity position="-0.91 0.15 -4.2" mixin="button" icon="src: #icon-home"></a-entity>
+
+      <a-entity position="-0.57 0.15 -4.2" mixin="button"
+       icon="src: #icon-secure; shape: rounded; radius: 50, 0, 0, 50"></a-entity>
+      <a-entity position="1.5 0.15 -4.2" mixin="button"
+       icon="src: #icon-microphone; shape: rounded; radius: 0, 50, 50, 0"></a-entity>
+
+      <a-entity position="0.46 0.15 -4.21" mixin="button" icon="size: 670 100"></a-entity>
+      <a-entity position="0.49 0.163 -4.18" text="value:http://mozilla.org; width: 1.86; wrapCount: 30"></a-entity>
+
+
+      <a-entity position="1.85 0.15 -4.2" mixin="button" icon="src: #icon-hamburger"></a-entity>
 
 
     </a-scene>
