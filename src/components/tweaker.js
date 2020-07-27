@@ -73,5 +73,5 @@ AFRAME.registerComponent('tweaker', {
 })
 
 function pad(v){
-  return Math.floor(v * 100) / 100;
+  return Math.floor(v * 1000) / 1000;
 }

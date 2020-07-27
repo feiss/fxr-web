@@ -6,7 +6,6 @@ AFRAME.registerComponent('image', {
     sizeInMeters: {default: false}
   },
 
-
   init: function () {
     const RATIO = this.data.sizeInMeters ? 1 : WORLD_DPI_RATIO;
     this.el.setAttribute('geometry', {
@@ -22,4 +21,10 @@ AFRAME.registerComponent('image', {
       src: this.data.src
     })
   },
+
+  update: function (oldData) {
+    if (oldData.src !== this.data.src) {
+      this.el.setAttribute('material', {src: this.data.src});
+    }
+  }
 })

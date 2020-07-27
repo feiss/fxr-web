@@ -5,17 +5,33 @@ const SAMPLING = 1; // sampling quality (higher, better)
 
 AFRAME.registerComponent('icon', {
   schema: {
-    state: {type: 'string', oneOf: ['normal', 'hover', 'clicked'], default: 'normal'},
+    state: {type: 'string', default: 'normal'},
     src: {type: 'selector'},
     size: {type: 'vec2', default: {x: 100, y: 100} },
     shape: {type: 'string', oneOf: ['none', 'circle', 'square', 'box', 'rounded'], default: 'circle'},
     radius: {default: [20, 20, 20, 20]},
-    normalBgColor: {type: 'color', default: '#3d3d3d'},
-    hoverBgColor: {type: 'color', default: '#e2e6eb'},
-    normalColor: {type: 'color', default: '#e2e6eb'},
-    hoverColor: {type: 'color', default: '#3d3d3d'},
-    minScale: {default: 0.6},
-    maxScale: {default: 0.7},
+
+    normalColor: {type: 'color', default: COLOR_FOG},
+    normalBgColor: {type: 'color', default: COLOR_ASPHALT},
+
+    hoverColor: {type: 'color', default: COLOR_ASPHALT},
+    hoverBgColor: {type: 'color', default: COLOR_FOG},
+
+    selectColor: {type: 'color', default: COLOR_FOG},
+    selectBgColor: {type: 'color', default: COLOR_VOID},
+
+
+    normalColorPrivate: {type: 'color', default: COLOR_FOG},
+    normalBgColorPrivate: {type: 'color', default: COLOR_EGGPLANT},
+
+    hoverColorPrivate: {type: 'color', default: COLOR_EGGPLANT},
+    hoverBgColorPrivate: {type: 'color', default: COLOR_FOG},
+
+    selectColorPrivate: {type: 'color', default: COLOR_FOG},
+    selectBgColorPrivate: {type: 'color', default: COLOR_BLACKBERRY},
+
+    minScale: {default: 0.5},
+    maxScale: {default: 0.6},
   },
 
   init: function () {
@@ -78,7 +94,10 @@ AFRAME.registerComponent('icon', {
   },
 
   initIcon: function (sel) {
+    this.system.registerMe(this);
+
     if (!sel) return;
+
     const W = this.width;
     const H = this.height
 
@@ -122,11 +141,14 @@ AFRAME.registerComponent('icon', {
   },
 
   update: function (oldData) {
-    if (!oldData || oldData && oldData.state !== this.data.state) {
+    if (!oldData || oldData &&
+        (oldData.state !== this.data.state ||
+        oldData.privateMode !== this.data.privateMode) ){
       let obj;
-      this.bg.material.color.setStyle(this.data[this.data.state + 'BgColor']);
-      this.fg.material.emissive.setStyle(this.data[this.data.state + 'Color']);
-      const scale = this.data.state == 'hover' ? this.data.maxScale : this.data.minScale;
+      const private = this.system.data.privateMode ? 'Private' : '';
+      this.bg.material.color.setStyle(this.data[this.data.state + 'BgColor' + private]);
+      this.fg.material.emissive.setStyle(this.data[this.data.state + 'Color' + private]);
+      const scale = this.data.state !== 'normal' ? this.data.maxScale : this.data.minScale;
       AFRAME.ANIME({
         targets: this.fg.scale,
         x: scale,
@@ -138,3 +160,26 @@ AFRAME.registerComponent('icon', {
   }
 
 });
+
+
+AFRAME.registerSystem('icon', {
+  schema: {
+    privateMode : {default: false}
+  },
+
+  init: function () {
+    this.entities = [];
+  },
+
+  setPrivateMode: function (private){
+    this.data.privateMode = private;
+    for (var i = 0; i < this.entities.length; i++) {
+      this.entities[i].update(null);
+    }
+  },
+
+  registerMe: function (el) {
+    this.entities.push(el);
+  }
+});
+
