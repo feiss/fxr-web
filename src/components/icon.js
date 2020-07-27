@@ -5,11 +5,15 @@ const SAMPLING = 1; // sampling quality (higher, better)
 
 AFRAME.registerComponent('icon', {
   schema: {
-    state: {type: 'string', default: 'normal'},
+    state: {type: 'string', oneOf: ['normal', 'hover', 'select', 'disabled', 'notify'], default: 'normal'},
     src: {type: 'selector'},
     size: {type: 'vec2', default: {x: 100, y: 100} },
     shape: {type: 'string', oneOf: ['none', 'circle', 'square', 'box', 'rounded'], default: 'circle'},
     radius: {default: [20, 20, 20, 20]},
+
+    toggled: {default: false},
+
+// normal colors
 
     normalColor: {type: 'color', default: COLOR_FOG},
     normalBgColor: {type: 'color', default: COLOR_ASPHALT},
@@ -20,6 +24,16 @@ AFRAME.registerComponent('icon', {
     selectColor: {type: 'color', default: COLOR_FOG},
     selectBgColor: {type: 'color', default: COLOR_VOID},
 
+    activeColor: {type: 'color', default: COLOR_FOG},
+    activeBgColor: {type: 'color', default: COLOR_VOID},
+
+    disabledColor: {type: 'color', default: COLOR_VOID},
+    disabledBgColor: {type: 'color', default: COLOR_ASPHALT},
+
+    notifyColor: {type: 'color', default: COLOR_AZURE},
+    notifyBgColor: {type: 'color', default: COLOR_ASPHALT},
+
+// private colors
 
     normalColorPrivate: {type: 'color', default: COLOR_FOG},
     normalBgColorPrivate: {type: 'color', default: COLOR_EGGPLANT},
@@ -27,11 +41,14 @@ AFRAME.registerComponent('icon', {
     hoverColorPrivate: {type: 'color', default: COLOR_EGGPLANT},
     hoverBgColorPrivate: {type: 'color', default: COLOR_FOG},
 
-    selectColorPrivate: {type: 'color', default: COLOR_FOG},
-    selectBgColorPrivate: {type: 'color', default: COLOR_BLACKBERRY},
+    selectColorPrivate: {type: 'color', default: COLOR_EGGPLANT},
+    selectBgColorPrivate: {type: 'color', default: COLOR_FOG},
+
+    disabledColorPrivate: {type: 'color', default: COLOR_VOID},
+    disabledBgColorPrivate: {type: 'color', default: COLOR_EGGPLANT},
 
     minScale: {default: 0.5},
-    maxScale: {default: 0.6},
+    maxScale: {default: 0.5 * 1.25},
   },
 
   init: function () {
@@ -140,23 +157,31 @@ AFRAME.registerComponent('icon', {
     img.src = url;
   },
 
-  update: function (oldData) {
-    if (!oldData || oldData &&
-        (oldData.state !== this.data.state ||
-        oldData.privateMode !== this.data.privateMode) ){
-      let obj;
-      const private = this.system.data.privateMode ? 'Private' : '';
-      this.bg.material.color.setStyle(this.data[this.data.state + 'BgColor' + private]);
-      this.fg.material.emissive.setStyle(this.data[this.data.state + 'Color' + private]);
-      const scale = this.data.state !== 'normal' ? this.data.maxScale : this.data.minScale;
-      AFRAME.ANIME({
-        targets: this.fg.scale,
-        x: scale,
-        y: scale,
-        duration: 200,
-        easing: 'linear'
-      });
+  setRaycastable: function (raycastable) {
+    console.log('raycastable', raycastable);
+    if (raycastable) {
+      this.el.classList.add('raycastable');
+    } else {
+      this.el.classList.remove('raycastable');
     }
+  },
+
+  update: function (oldData) {
+    this.setRaycastable(this.data.state !== 'disabled');
+    let obj;
+    const private = this.system.data.privateMode ? 'Private' : '';
+    let drawState = this.data.state;
+    if (this.data.toggled && this.data.state === 'normal') { drawState = 'select'; }
+    this.bg.material.color.setStyle(this.data[drawState + 'BgColor' + private]);
+    this.fg.material.emissive.setStyle(this.data[drawState + 'Color' + private]);
+    const scale = this.data.state !== 'normal' && this.data.state !== 'disabled' ? this.data.maxScale : this.data.minScale;
+    AFRAME.ANIME({
+      targets: this.fg.scale,
+      x: scale,
+      y: scale,
+      duration: 200,
+      easing: 'linear'
+    });
   }
 
 });
