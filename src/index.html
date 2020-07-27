@@ -13,8 +13,9 @@
       window.XRWebGLLayer.prototype = realConstructor.prototype;
 
     </script>
-    <script src="https://aframe.io/releases/1.0.4/aframe.js"></script>
-    <script src="https://unpkg.com/aframe-proxy-event-component/dist/aframe-proxy-event-component.min.js"></script>
+    <!--<script src="https://aframe.io/releases/1.0.4/aframe.js"></script>-->
+    <script src="components/aframe.min.js"></script>
+    <script src="components/aframe-proxy-event-component.min.js"></script>
 
     <script src="components/colors.js"></script>
     <script src="components/cubemap.js"></script>
@@ -26,7 +27,7 @@
   </head>
   <body>
     <a-scene id="scene" background="color: #000000" scenemanager tweaker
-      event-set__setprivate="scenemanager.privateMode: TOGGLE"
+      event-set__toggleprivate="scenemanager.privateMode: TOGGLE"
       >
       <a-assets>
         <img id="screen-home" src="../assets/screen-home.png">
@@ -54,7 +55,6 @@
         <a-asset-item id="icon-urlbar" src="../assets/icons/urlbar.svg"></a-asset-item>
 
         <a-mixin id="button"
-          class="raycastable"
           event-set__mouseenter="icon.state: hover"
           event-set__mouseleave="icon.state: normal"
           event-set__mousedown="icon.state: select"
@@ -67,7 +67,8 @@
         look-controls
         wasd-controls
         position="0 1.7 0"
-        cursor="rayOrigin: mouse"></a-entity>
+        cursor="rayOrigin: mouse;"
+        raycaster="far: 10; objects: .raycastable"></a-entity>
 
       <a-entity oculus-touch-controls="hand: left"></a-entity>
       <a-entity oculus-touch-controls="hand: right"></a-entity>
@@ -92,7 +93,7 @@
          icon="src: #icon-secure; shape: rounded; radius: 50, 0, 0, 50"></a-entity>
 
         <a-entity position="-1.85 0.15 -4.2" mixin="button" icon="src: #icon-backward"></a-entity>
-        <a-entity position="-1.54 0.15 -4.2" mixin="button" icon="src: #icon-forward"></a-entity>
+        <a-entity position="-1.54 0.15 -4.2" icon="src: #icon-forward; state: disabled"></a-entity>
         <a-entity position="-1.23 0.15 -4.2" mixin="button" icon="src: #icon-refresh"></a-entity>
         <a-entity position="-0.91 0.15 -4.2" mixin="button" icon="src: #icon-home"></a-entity>
 
@@ -102,7 +103,7 @@
          icon="src: #icon-microphone; shape: rounded; radius: 0, 50, 50, 0"></a-entity>
 
         <a-entity position="0.46 0.15 -4.201" icon="size: 670 100"></a-entity>
-        <a-entity position="0.49 0.163 -4.199" text="value:http://mozilla.org; width: 1.86; wrapCount: 30"></a-entity>
+        <a-entity position="0.49 0.163 -4.199" text="color: #8c898a;value:http://mozilla.org; width: 1.86; wrapCount: 30"></a-entity>
 
         <a-entity position="1.85 0.15 -4.2" mixin="button" icon="src: #icon-hamburger"></a-entity>
       </a-entity>
@@ -116,12 +117,13 @@
           icon="shape: box; src: #icon-tray-newtab"></a-entity>
         <a-entity position="-0.05 0 0" mixin="button"
           icon="shape: box; src: #icon-tray-private-browsing"
-          proxy-event="event: click; to: #scene; as: setprivate"
+          proxy-event="event: click; to: #scene; as: toggleprivate"
+          event-set__click="icon.state: active; icon.toggled: TOGGLE"
           ></a-entity>
-        <a-entity position="0.228 0 0" mixin="button"
+        <a-entity id="library-button" position="0.228 0 0" mixin="button"
           icon="shape: box; src: #icon-tray-library"
-          proxy-event="event: click; to: #screen; as: library"
-          event-set__click="icon.state: active"
+          proxy-event="event: click; to: #scene; as: togglelibrary"
+          event-set__click="icon.state: active; icon.toggled: TOGGLE"
           ></a-entity>
         <a-entity position="0.504 0 0" mixin="button"
         icon="src: #icon-tray-settings; shape: rounded; radius: 0, 50, 50, 0"></a-entity>
